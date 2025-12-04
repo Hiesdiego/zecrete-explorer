@@ -1,0 +1,83 @@
+// src/components/LoadDemoButton.tsx
+"use client";
+
+import { useEffect, useState } from "react";
+import { useExplorer } from "@/context/ExplorerStore";
+import { useWalletStore } from "@/lib/store/walletStore";
+import { generatePortfolio } from "@/lib/mock/portfolio";
+import { eventBus } from "@/lib/eventBus";
+import type { TxRecord } from "@/lib/types";
+
+const DEMO_UFVK = "ufvkdemokey1";
+const DEMO_LOADED_FLAG = "zecrete:demoPortfolioLoaded";
+
+export function LoadDemoButton() {
+  const { txs, setTxs } = useExplorer();
+  const walletStore = useWalletStore();
+  const [showButton, setShowButton] = useState(false);
+
+  useEffect(() => {
+    const check = () => {
+      const ufvk = walletStore.getState().ufvk?.trim();
+      const isDemoKey = ufvk === DEMO_UFVK;
+      const alreadyLoaded = localStorage.getItem(DEMO_LOADED_FLAG) === "1" || txs.length > 0;
+
+      setShowButton(isDemoKey && !alreadyLoaded);
+    };
+
+    check();
+    const unsub = walletStore.subscribe(check);
+    eventBus.on("wallet:loaded", check);
+    eventBus.on("session:unlocked", check);
+
+    return () => {
+      unsub();
+      eventBus.off("wallet:loaded", check);
+      eventBus.off("session:unlocked", check);
+    };
+  }, [txs.length, walletStore]);
+
+  const loadDemo = () => {
+    const ufvk = walletStore.getState().ufvk;
+    if (!ufvk) return;
+
+    const demo = generatePortfolio({ seed: ufvk, count: 1200 });
+    const normalized: TxRecord[] = demo.txs.map((t: any) => {
+      const value = typeof t.value === "number" ? t.value : 1;
+      const amount = Math.round(Math.abs(value) * 1e8) * (t.type === "incoming" ? 1 : -1);
+      const timestamp = t.timestamp ?? Math.floor(Date.now() / 1000);
+
+      return {
+        txid: t.txid ?? `demo_${timestamp}`,
+        height: t.height ?? 2_900_000,
+        timestamp,
+        pool: t.pool ?? "orchard",
+        amount,
+        memo: t.notes?.[0]?.memo ?? t.memo,
+        direction: t.type === "incoming" ? "incoming" : "outgoing",
+        keyId: t.fromAddr?.startsWith("you:") ? "demo_user" : "demo_other",
+        raw: t,
+      } as TxRecord;
+    }).sort((a, b) => b.timestamp - a.timestamp);
+
+    setTxs(normalized);
+    localStorage.setItem(DEMO_LOADED_FLAG, "1");
+    eventBus.emit("toast", { type: "success", text: `Demo portfolio loaded — ${normalized.length} transactions` });
+  };
+
+  if (!showButton) return null;
+
+  return (
+    <div className="fixed bottom-8 right-8 z-50 animate-in fade-in slide-in-from-bottom duration-500">
+      <button
+        onClick={loadDemo}
+        className="group relative overflow-hidden rounded-full bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-5 font-bold text-white shadow-2xl transition-all hover:scale-105 hover:shadow-purple-500/50"
+      >
+        <span className="relative z-10 flex items-center gap-3">
+          Load Demo Portfolio
+        </span>
+        <div className="absolute inset-0 -translate-x-full bg-white/20 transition-transform group-hover:translate-x-0" />
+      </button>
+    </div>
+  );
+}
