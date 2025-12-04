@@ -4,8 +4,6 @@ import Link from "next/link";
 import {
   Home,
   Compass,
-  Database,
-  Shield,
   BarChart,
   Book,
   Github,
@@ -78,7 +76,7 @@ export default function DynamicIslandHeader() {
 
   return (
     <>
-      {/* Apple Island Header */}
+      
       <header className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-auto">
         <div
           className={`relative transition-all duration-500 ${
