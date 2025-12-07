@@ -345,7 +345,7 @@ export default function DynamicIslandHeader() {
       )}
 
       {/* DESKTOP NAV MENU */}
-      <nav className="fixed top-[7rem] left-1/2 -translate-x-1/2 z-40 hidden md:block">
+      <nav className="fixed top-[7rem]  left-1/2 -translate-x-1/2 z-40 hidden md:block">
         <div
           className="rounded-2xl p-2 shadow-2xl shadow-black/20"
           style={{ background: "var(--surface)" }}

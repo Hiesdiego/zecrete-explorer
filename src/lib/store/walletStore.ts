@@ -4,7 +4,6 @@
 // Defensive: avoid accidental overwrites with empty UFVK values.
 // ------------------------------------------------------------
 
-console.debug("🚨 walletStore FILE LOADED");
 
 import { GLOBAL_MOCK_DATASET } from "@/lib/mock/global";
 import { getMockWalletForUFVK } from "@/lib/mock/ufvkSampler";
