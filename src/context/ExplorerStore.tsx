@@ -62,7 +62,7 @@ function genTx(heightBase: number, i: number, keyId = "demo_key"): TxRecord {
 }
 
 export function ExplorerProvider({ children }: { children: React.ReactNode }) {
-  
+  console.debug("ExplorerProvider MOUNTED");
 
   const [txs, setTxs] = useState<TxRecord[]>([]);
   const [progress, setProgress] = useState<ScanProgress>(null);

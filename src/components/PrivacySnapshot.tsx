@@ -1,5 +1,4 @@
-// src/components/PrivacySnapshot.tsx
-"use client";
+'use client';
 import React, { useMemo, useState, useCallback } from "react";
 import type { TxRecord } from "@/lib/types";
 import { eventBus } from "@/lib/eventBus";
@@ -9,8 +8,10 @@ import {
   Shield,
   AlertTriangle,
   Users,
+  BarChart3,
   Download,
   ChevronDown,
+  ChevronRight,
   Eye,
   EyeOff,
   Sparkles,
@@ -21,7 +22,8 @@ import {
   Zap,
   Activity,
   Maximize2,
-  Minimize2
+  Minimize2,
+  RefreshCw
 } from "lucide-react";
 
 type Props = {
@@ -42,11 +44,6 @@ export default function PrivacySnapshot({ txs, privacySummary, onOpenHeatmap }: 
   const [collapsed, setCollapsed] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const txCount = safeTxs.length;
-
-  // Card base class depending on theme
-  const card = isDark
-    ? "glass p-4 sm:p-6 rounded-xl border border-[var(--border)]"
-    : "bg-white/90 p-4 sm:p-6 rounded-xl backdrop-blur-xl border border-gray-300/30";
 
   // Toggle ghost mode
   const toggleGhostMode = useCallback(() => {
@@ -206,7 +203,7 @@ export default function PrivacySnapshot({ txs, privacySummary, onOpenHeatmap }: 
   // Collapsed view
   if (collapsed) {
     return (
-      <div className={`${isDark ? 'glass-heavy' : 'bg-white/90 backdrop-blur-xl'} rounded-xl p-4 border border-[var(--border)] hover:border-[var(--accent)] transition-all duration-300 pt-24 sm:pt-6`}>
+      <div className={`glass-heavy rounded-xl p-4 border border-[var(--border)] hover:border-[var(--accent)] transition-all duration-300 pt-24 sm:pt-6 ${isDark ? 'dark' : ''}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg gold-gradient flex items-center justify-center">
@@ -214,7 +211,7 @@ export default function PrivacySnapshot({ txs, privacySummary, onOpenHeatmap }: 
             </div>
             <div>
               <div className="text-xs text-[var(--text-secondary)]">Privacy Score</div>
-              <div className="text-2xl font-bold gold-gradient-text text-[var(--text)]">{stats.overallScore}/100</div>
+              <div className="text-2xl font-bold gold-gradient-text">{stats.overallScore}/100</div>
             </div>
           </div>
 
@@ -229,7 +226,7 @@ export default function PrivacySnapshot({ txs, privacySummary, onOpenHeatmap }: 
 
             <button
               onClick={() => setCollapsed(false)}
-              className={`flex items-center gap-1 px-3 py-2 rounded-lg ${isDark ? 'glass' : 'bg-white/80'} hover:bg-[var(--surface)] text-sm`}
+              className="flex items-center gap-1 px-3 py-2 rounded-lg glass hover:bg-[var(--surface)] text-sm"
             >
               <Maximize2 className="w-4 h-4" />
               <span>Expand</span>
@@ -240,7 +237,7 @@ export default function PrivacySnapshot({ txs, privacySummary, onOpenHeatmap }: 
         <div className="mt-3 grid grid-cols-2 gap-2">
           <div className="text-center">
             <div className="text-xs text-[var(--text-secondary)]">Anonymity</div>
-            <div className="font-semibold text-[var(--text)]">{stats.anonymitySet}</div>
+            <div className="font-semibold">{stats.anonymitySet}</div>
           </div>
           <div className="text-center">
             <div className="text-xs text-[var(--text-secondary)]">High Risk</div>
@@ -254,9 +251,9 @@ export default function PrivacySnapshot({ txs, privacySummary, onOpenHeatmap }: 
   }
 
   return (
-    <div className={`${isDark ? 'glass-heavy' : 'bg-white/90 backdrop-blur-xl'} rounded-2xl border border-[var(--border)] overflow-hidden pt-24 sm:pt-6`}>
+    <div className={`glass-heavy rounded-2xl border border-[var(--border)] overflow-hidden pt-24 sm:pt-6 ${isDark ? 'dark' : ''}`}>
       {/* Header */}
-      <div className="p-4 sm:p-6 border-b border-[var(--border)]" style={{ background: "linear-gradient(90deg, rgba(212,175,55,0.06) 0%, transparent 100%)" }}>
+      <div className="p-4 sm:p-6 border-b border-[var(--border)] bg-gradient-to-r from-[var(--accent)]/10 to-transparent">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-start sm:items-center gap-3">
             <div className="relative">
@@ -264,12 +261,14 @@ export default function PrivacySnapshot({ txs, privacySummary, onOpenHeatmap }: 
                 <Shield className="w-6 h-6 text-black" />
               </div>
               <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-[var(--surface)] border-2 border-[var(--bg)] flex items-center justify-center">
-                <div className={`w-2 h-2 rounded-full ${stats.overallScore >= 80 ? 'bg-green-500' : stats.overallScore >= 60 ? 'bg-amber-500' : 'bg-rose-500'} animate-pulse`} />
+                <div className={`w-2 h-2 rounded-full ${
+                  stats.overallScore >= 80 ? 'bg-green-500' : stats.overallScore >= 60 ? 'bg-amber-500' : 'bg-rose-500'
+                } animate-pulse`} />
               </div>
             </div>
 
             <div>
-              <h2 className="text-lg sm:text-xl font-bold flex items-center gap-2 text-[var(--text)]">
+              <h2 className="text-lg sm:text-xl font-bold flex items-center gap-2">
                 Privacy Snapshot
                 <span className="text-xs font-normal text-[var(--text-secondary)] bg-[var(--surface)] px-2 py-1 rounded-full">
                   {txCount} txs
@@ -284,18 +283,17 @@ export default function PrivacySnapshot({ txs, privacySummary, onOpenHeatmap }: 
           <div className="flex items-center gap-2">
             <button
               onClick={toggleGhostMode}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${ghost ? 'bg-gradient-to-r from-[var(--accent)]/20 to-[var(--accent-dark)]/20 text-[var(--accent)] border border-[var(--accent)]/30' : (isDark ? 'glass hover:bg-[var(--surface)]' : 'bg-white/80 hover:bg-[var(--surface)]')}`}
-            >
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${ghost ? 'bg-gradient-to-r from-[var(--accent)]/20 to-[var(--accent-dark)]/20 text-[var(--accent)] border border-[var(--accent)]/30' : 'glass hover:bg-[var(--surface)]'}`}>
               {ghost ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              <span className="text-sm hidden sm:inline text-[var(--text)]">{ghost ? 'Ghost' : 'Normal'}</span>
+              <span className="text-sm hidden sm:inline">{ghost ? 'Ghost' : 'Normal'}</span>
             </button>
 
             <button
               onClick={() => setCollapsed(true)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg ${isDark ? 'glass hover:bg-[var(--surface)]' : 'bg-white/80 hover:bg-[var(--surface)]'}`}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg glass hover:bg-[var(--surface)]"
             >
               <Minimize2 className="w-4 h-4" />
-              <span className="text-sm hidden sm:inline text-[var(--text)]">Minimize</span>
+              <span className="text-sm hidden sm:inline">Minimize</span>
             </button>
           </div>
         </div>
@@ -306,21 +304,25 @@ export default function PrivacySnapshot({ txs, privacySummary, onOpenHeatmap }: 
         {/* Overall Score & Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           {/* Privacy Score Card */}
-          <div className={`${card}`}>
+          <div className="glass p-4 sm:p-6 rounded-xl border border-[var(--border)]">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-[var(--accent)]" />
-                <span className="font-medium text-[var(--text)]">Overall Privacy Score</span>
+                <span className="font-medium">Overall Privacy Score</span>
               </div>
-              <div className={`text-xs px-2 py-1 rounded-full ${stats.overallScore >= 80 ? 'bg-green-500/10 text-green-400' : stats.overallScore >= 60 ? 'bg-amber-500/10 text-amber-400' : 'bg-rose-500/10 text-rose-400'}`}>
+              <div className={`text-xs px-2 py-1 rounded-full ${
+                stats.overallScore >= 80 ? 'bg-green-500/10 text-green-400' : stats.overallScore >= 60 ? 'bg-amber-500/10 text-amber-400' : 'bg-rose-500/10 text-rose-400'
+              }`}>
                 {stats.overallScore >= 80 ? 'Excellent' : stats.overallScore >= 60 ? 'Good' : 'Needs Attention'}
               </div>
             </div>
 
             <div className="mb-3">
-              <div className="text-3xl sm:text-5xl font-bold gold-gradient-text mb-1 text-[var(--text)]">{stats.overallScore}/100</div>
+              <div className="text-3xl sm:text-5xl font-bold gold-gradient-text mb-1">{stats.overallScore}/100</div>
               <div className="w-full h-2 bg-[var(--surface)] rounded-full overflow-hidden">
-                <div className={`h-full transition-all duration-1000 ${stats.overallScore >= 80 ? 'bg-gradient-to-r from-green-500 to-emerald-500' : stats.overallScore >= 60 ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-gradient-to-r from-rose-500 to-red-500'}`} style={{ width: `${stats.overallScore}%` }} />
+                <div className={`h-full transition-all duration-1000 ${
+                  stats.overallScore >= 80 ? 'bg-gradient-to-r from-green-500 to-emerald-500' : stats.overallScore >= 60 ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-gradient-to-r from-rose-500 to-red-500'
+                }`} style={{ width: `${stats.overallScore}%` }} />
               </div>
             </div>
 
@@ -328,17 +330,17 @@ export default function PrivacySnapshot({ txs, privacySummary, onOpenHeatmap }: 
           </div>
 
           {/* Anonymity & Clustering */}
-          <div className={`${card}`}>
+          <div className="glass p-4 sm:p-6 rounded-xl border border-[var(--border)]">
             <div className="flex items-center gap-2 mb-3">
               <Users className="w-5 h-5 text-[var(--accent)]" />
-              <span className="font-medium text-[var(--text)]">Anonymity Metrics</span>
+              <span className="font-medium">Anonymity Metrics</span>
             </div>
 
             <div className="space-y-3">
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm text-[var(--text-secondary)]">Anonymity Set</span>
-                  <span className="font-semibold text-[var(--text)]">{stats.anonymitySet}</span>
+                  <span className="font-semibold">{stats.anonymitySet}</span>
                 </div>
                 <div className="text-xs text-[var(--text-secondary)]">Distinct receiving addresses</div>
               </div>
@@ -346,7 +348,7 @@ export default function PrivacySnapshot({ txs, privacySummary, onOpenHeatmap }: 
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm text-[var(--text-secondary)]">Transaction Clusters</span>
-                  <span className="font-semibold text-[var(--text)]">{stats.clusterCount}</span>
+                  <span className="font-semibold">{stats.clusterCount}</span>
                 </div>
                 <div className="text-xs text-[var(--text-secondary)]">Largest: {stats.largestCluster} txs</div>
               </div>
@@ -354,27 +356,21 @@ export default function PrivacySnapshot({ txs, privacySummary, onOpenHeatmap }: 
           </div>
 
           {/* Risk Breakdown */}
-          <div className={`${card}`}>
+          <div className="glass p-4 sm:p-6 rounded-xl border border-[var(--border)]">
             <div className="flex items-center gap-2 mb-3">
               <AlertTriangle className="w-5 h-5 text-[var(--accent)]" />
-              <span className="font-medium text-[var(--text)]">Risk Assessment</span>
+              <span className="font-medium">Risk Assessment</span>
             </div>
 
-            <div className="space-y-2 text-[var(--text)]">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-rose-500" /> <span className="text-sm text-[var(--text)]">High Risk</span></div>
+                <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-rose-500" /> <span className="text-sm">High Risk</span></div>
                 <div className="font-semibold text-rose-400">{stats.highRisk}</div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-amber-500" /> <span className="text-sm text-[var(--text)]">Medium Risk</span></div>
-                <div className="font-semibold text-amber-400">{stats.medRisk}</div>
-              </div>
+              <div className="flex items-center justify-between"><div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-amber-500" /> <span className="text-sm">Medium Risk</span></div><div className="font-semibold text-amber-400">{stats.medRisk}</div></div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-green-500" /> <span className="text-sm text-[var(--text)]">Low Risk</span></div>
-                <div className="font-semibold text-green-400">{stats.lowRisk}</div>
-              </div>
+              <div className="flex items-center justify-between"><div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-green-500" /> <span className="text-sm">Low Risk</span></div><div className="font-semibold text-green-400">{stats.lowRisk}</div></div>
             </div>
           </div>
         </div>
@@ -382,8 +378,8 @@ export default function PrivacySnapshot({ txs, privacySummary, onOpenHeatmap }: 
         {/* Transaction Analysis */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           {/* Biggest Transactions */}
-          <div className={`${card}`}>
-            <div className="flex items-center gap-2 mb-3"><TrendingUp className="w-5 h-5 text-[var(--accent)]" /> <span className="font-medium text-[var(--text)]">Key Transactions</span></div>
+          <div className="glass p-4 sm:p-6 rounded-xl border border-[var(--border)]">
+            <div className="flex items-center gap-2 mb-3"><TrendingUp className="w-5 h-5 text-[var(--accent)]" /> <span className="font-medium">Key Transactions</span></div>
 
             <div className="space-y-3">
               <div>
@@ -419,8 +415,8 @@ export default function PrivacySnapshot({ txs, privacySummary, onOpenHeatmap }: 
           </div>
 
           {/* Network Statistics */}
-          <div className={`${card}`}>
-            <div className="flex items-center gap-2 mb-3"><Network className="w-5 h-5 text-[var(--accent)]" /> <span className="font-medium text-[var(--text)]">Network Analysis</span></div>
+          <div className="glass p-4 sm:p-6 rounded-xl border border-[var(--border)]">
+            <div className="flex items-center gap-2 mb-3"><Network className="w-5 h-5 text-[var(--accent)]" /> <span className="font-medium">Network Analysis</span></div>
 
             <div className="space-y-3">
               <div>
@@ -446,9 +442,9 @@ export default function PrivacySnapshot({ txs, privacySummary, onOpenHeatmap }: 
         </div>
 
         {/* Address Exposure */}
-        <div className={`${card} mb-6`}>
+        <div className="glass p-4 sm:p-6 rounded-xl border border-[var(--border)] mb-6">
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2"><Target className="w-5 h-5 text-[var(--accent)]" /> <span className="font-medium text-[var(--text)]">Address Exposure</span></div>
+            <div className="flex items-center gap-2"><Target className="w-5 h-5 text-[var(--accent)]" /> <span className="font-medium">Address Exposure</span></div>
             <span className="text-sm text-[var(--text-secondary)]">{stats.topAddresses.length} addresses</span>
           </div>
 
@@ -463,7 +459,7 @@ export default function PrivacySnapshot({ txs, privacySummary, onOpenHeatmap }: 
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center ${index === 0 ? 'gold-gradient' : 'bg-[var(--surface)]'}`}>
                         <span className={`text-xs font-bold ${index === 0 ? 'text-black' : 'text-[var(--accent)]'}`}>#{index + 1}</span>
                       </div>
-                      <div className="font-mono text-sm truncate max-w-[120px] text-[var(--text)]">{ghost ? `${address.slice(0, 6)}...` : address}</div>
+                      <div className="font-mono text-sm truncate max-w-[120px]">{ghost ? `${address.slice(0, 6)}...` : address}</div>
                     </div>
                     <span className="text-xs text-[var(--text-secondary)]">{count} txs</span>
                   </div>
@@ -475,14 +471,14 @@ export default function PrivacySnapshot({ txs, privacySummary, onOpenHeatmap }: 
         </div>
 
         {/* Recommendations & Actions */}
-        <div className={`${card}`}>
-          <div className="flex items-center gap-2 mb-3"><Sparkles className="w-5 h-5 text-[var(--accent)]" /> <span className="font-medium text-[var(--text)]">Privacy Recommendations</span></div>
+        <div className="glass p-4 sm:p-6 rounded-xl border border-[var(--border)]">
+          <div className="flex items-center gap-2 mb-3"><Sparkles className="w-5 h-5 text-[var(--accent)]" /> <span className="font-medium">Privacy Recommendations</span></div>
 
           <div className="space-y-2 mb-4">
             {recommendations.map((rec, index) => (
               <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-[var(--surface)]">
-                <div className="w-6 h-6 rounded-full bg-gradient-to-r from-[var(--accent)]/20 to-transparent flex items-center justify-center flex-shrink-0"><ChevronDown className="w-3 h-3 text-[var(--accent)]" /></div>
-                <span className="text-sm text-[var(--text)]">{rec}</span>
+                <div className="w-6 h-6 rounded-full bg-gradient-to-r from-[var(--accent)]/20 to-transparent flex items-center justify-center flex-shrink-0"><ChevronRight className="w-3 h-3 text-[var(--accent)]" /></div>
+                <span className="text-sm">{rec}</span>
               </div>
             ))}
           </div>
@@ -491,16 +487,16 @@ export default function PrivacySnapshot({ txs, privacySummary, onOpenHeatmap }: 
             <div className="text-xs text-[var(--text-secondary)] flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> <span>Report generated locally — no data leaves device.</span></div>
 
             <div className="flex items-center gap-2">
-              <button onClick={exportReport} className={`flex items-center gap-2 px-3 py-2 rounded-lg ${isDark ? 'glass hover:bg-[var(--surface)]' : 'bg-white/80 hover:bg-[var(--surface)]'}`}>
-                <Download className="w-4 h-4" /> <span className="text-sm hidden sm:inline text-[var(--text)]">Export</span>
+              <button onClick={exportReport} className="flex items-center gap-2 px-3 py-2 rounded-lg glass hover:bg-[var(--surface)]">
+                <Download className="w-4 h-4" /> <span className="text-sm hidden sm:inline">Export</span>
               </button>
 
               <button onClick={handleDeepAnalysis} className="flex items-center gap-2 px-3 py-2 rounded-lg gold-gradient text-black font-medium">
                 <Zap className="w-4 h-4" /> <span className="text-sm hidden sm:inline">Deep Analysis</span>
               </button>
 
-              <button onClick={() => { if (onOpenHeatmap) onOpenHeatmap(); else eventBus.emit("ui:open-heatmap"); }} className={`flex items-center gap-2 px-3 py-2 rounded-lg ${isDark ? 'glass hover:bg-[var(--surface)]' : 'bg-white/80 hover:bg-[var(--surface)]'}`}>
-                <Activity className="w-4 h-4" /> <span className="text-sm hidden sm:inline text-[var(--text)]">Activity Map</span>
+              <button onClick={() => { if (onOpenHeatmap) onOpenHeatmap(); else eventBus.emit("ui:open-heatmap"); }} className="flex items-center gap-2 px-3 py-2 rounded-lg glass hover:bg-[var(--surface)]">
+                <Activity className="w-4 h-4" /> <span className="text-sm hidden sm:inline">Activity Map</span>
               </button>
             </div>
           </div>
@@ -516,8 +512,8 @@ export default function PrivacySnapshot({ txs, privacySummary, onOpenHeatmap }: 
         {/* Technical Details */}
         {showDetails && (
           <div className="mt-4 p-4 sm:p-6 rounded-xl bg-[var(--surface)] border border-[var(--border)]">
-            <h4 className="font-medium mb-3 text-[var(--text)]">Technical Privacy Metrics</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-[var(--text)]">
+            <h4 className="font-medium mb-3">Technical Privacy Metrics</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
               <div>
                 <div className="text-[var(--text-secondary)]">Total Volume</div>
                 <div className="font-mono">{formatZec(stats.totalVolume, ghost)}</div>

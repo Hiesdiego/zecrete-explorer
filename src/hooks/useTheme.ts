@@ -28,8 +28,6 @@ export function useTheme() {
   const [isInitialized, setIsInitialized] = useState(false);
 
   const applyTheme = useCallback((t: ThemeChoice) => {
-    if (typeof window === "undefined") return "light";
-
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const resolved = t === "system" ? (prefersDark ? "dark" : "light") : t;
 
@@ -44,18 +42,64 @@ export function useTheme() {
     // Ensure color-scheme is set for form controls, scrollbars, etc.
     root.style.setProperty("color-scheme", resolved);
 
-    // Update resolvedTheme state for this hook instance
+    // Update resolvedTheme state
     setResolvedTheme(resolved);
 
-    // Emit global event with both the choice and resolved theme so other hook instances sync
+    // Emit global event for components that need to re-run theme-dependent init
     try {
-      eventBus.emit("theme:changed", { choice: t, resolved });
+      eventBus.emit("theme:changed", resolved);
     } catch (e) {
       // no-op if eventBus fails for any reason
     }
 
     return resolved;
   }, []);
+
+  // Initial application on mount
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // We already set initial state from localStorage above, so apply it now
+    applyTheme(theme);
+    setIsInitialized(true);
+  }, [applyTheme, theme]);
+
+  // Persist theme changes (when user triggers setTheme)
+  useEffect(() => {
+    if (!isInitialized || typeof window === "undefined") return;
+
+    try {
+      localStorage.setItem(STORAGE_KEY, theme);
+    } catch (error) {
+      console.warn("Failed to persist theme:", error);
+    }
+
+    applyTheme(theme);
+  }, [theme, applyTheme, isInitialized]);
+
+  // Listen for OS theme changes when in 'system' mode
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const handler = () => {
+      if (theme === "system") applyTheme("system");
+    };
+
+    if (mq.addEventListener) {
+      mq.addEventListener("change", handler);
+    } else {
+      mq.addListener(handler);
+    }
+
+    return () => {
+      if (mq.removeEventListener) {
+        mq.removeEventListener("change", handler);
+      } else {
+        mq.removeListener(handler);
+      }
+    };
+  }, [theme, applyTheme]);
 
   // Apply CSS variable overrides for resolvedTheme (keeps your existing variables)
   useEffect(() => {
@@ -100,132 +144,18 @@ export function useTheme() {
     }
   }, [resolvedTheme]);
 
-  // Initial application on mount
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    applyTheme(theme);
-    setIsInitialized(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // run once
-
-  // Persist theme changes and ensure applyTheme is always run when theme state changes
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    try {
-      localStorage.setItem(STORAGE_KEY, theme);
-    } catch (error) {
-      console.warn("Failed to persist theme:", error);
-    }
-
-    // ensure the DOM + vars update whenever theme changes in any hook instance
-    applyTheme(theme);
-  }, [theme, applyTheme]);
-
-  // Listen for OS theme changes when in 'system' mode
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = () => {
-      if (theme === "system") applyTheme("system");
-    };
-
-    if (mq.addEventListener) {
-      mq.addEventListener("change", handler);
-    } else {
-      mq.addListener(handler);
-    }
-
-    return () => {
-      if (mq.removeEventListener) {
-        mq.removeEventListener("change", handler);
-      } else {
-        mq.removeListener(handler);
-      }
-    };
-  }, [theme, applyTheme]);
-
-  // Sync between multiple hook instances via eventBus and across tabs via storage event.
-  useEffect(() => {
-    // eventBus handler: payload may be string (old emit) or object { choice, resolved }
-    const off = eventBus.on("theme:changed", (payload: any) => {
-      if (!payload) return;
-      if (typeof payload === "string") {
-        // backward compatibility: payload is resolved theme string ("dark"|"light")
-        const incomingResolved = payload as "dark" | "light";
-        setResolvedTheme(incomingResolved);
-        // keep user-chosen theme unless storage says otherwise; read storage if present
-        try {
-          const raw = localStorage.getItem(STORAGE_KEY);
-          if (raw) setTheme(raw as ThemeChoice);
-        } catch {}
-        return;
-      }
-
-      const { choice, resolved } = payload as { choice?: ThemeChoice; resolved?: "dark" | "light" };
-
-      if (choice && choice !== theme) {
-        setTheme(choice);
-      }
-      if (resolved && resolved !== resolvedTheme) {
-        setResolvedTheme(resolved);
-      }
-    });
-
-    // storage event for cross-tab sync
-    const storageHandler = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY) {
-        const newVal = (e.newValue as ThemeChoice) || "system";
-        // apply and update local state
-        setTheme(newVal);
-        applyTheme(newVal);
-      }
-    };
-
-    window.addEventListener("storage", storageHandler);
-    return () => {
-      off();
-      window.removeEventListener("storage", storageHandler);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [applyTheme, theme, resolvedTheme]);
-
   const toggleTheme = useCallback(() => {
-    setTheme((current) => {
+    setTheme(current => {
       const themes: ThemeChoice[] = ["dark", "light", "system"];
       const currentIndex = themes.indexOf(current);
       const nextIndex = (currentIndex + 1) % themes.length;
-      const next = themes[nextIndex];
-
-      // apply immediately so all instances see the change via eventBus
-      try {
-        applyTheme(next);
-      } catch (e) {
-        // fallback: just set state
-      }
-
-      try {
-        localStorage.setItem(STORAGE_KEY, next);
-      } catch {}
-
-      return next;
+      return themes[nextIndex];
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [applyTheme]);
+  }, []);
 
   const setThemeDirect = useCallback((t: ThemeChoice) => {
-    setTheme(() => {
-      try {
-        applyTheme(t);
-      } catch {}
-      try {
-        localStorage.setItem(STORAGE_KEY, t);
-      } catch {}
-      return t;
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [applyTheme]);
+    setTheme(t);
+  }, []);
 
   return {
     theme,
@@ -238,3 +168,4 @@ export function useTheme() {
     isInitialized,
   };
 }
+

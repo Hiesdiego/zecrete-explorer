@@ -1,4 +1,3 @@
-// src/components/LocalAiChat.tsx
 "use client";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import {
@@ -463,14 +462,6 @@ export default function LocalAiChat({ txs }: { txs: TxRecord[] }) {
     [connected, handleSubmit]
   );
 
-  // THEME-AWARE HELPERS (fix light-mode visuals)
-  const { } = { }; // keep linter happy if empty
-  // We'll compute glass classes to ensure light mode shows distinct cards
-  // (in dark mode we use your existing 'glass' styles; in light mode we fall back to bright card backgrounds)
-  const isDark = typeof window !== "undefined" ? document.documentElement.classList.contains("dark") : false;
-  const glass = isDark ? "glass" : "bg-white/90 backdrop-blur-xl";
-  const glassHeavy = isDark ? "glass-heavy" : "bg-white/90 backdrop-blur-xl";
-
   // Container classes - fixed when expanded, floating when closed/minimized
   // We'll compute container class/style depending on mobile vs desktop
   // Provide a top offset so it doesn't overlap a site header (header height ~ 4-8rem)
@@ -499,10 +490,10 @@ export default function LocalAiChat({ txs }: { txs: TxRecord[] }) {
 
   // Inner panel sizing
   const panelSizeClass = isMobile
-    ? `w-full h-[calc(100vh-76px)] max-w-none rounded-t-2xl ${glassHeavy} border border-[var(--border)] shadow-2xl overflow-hidden flex flex-col`
+    ? "w-full h-[calc(100vh-76px)] max-w-none rounded-t-2xl glass-heavy border border-[var(--border)] shadow-2xl overflow-hidden flex flex-col"
     : effectiveExpanded
-    ? `w-[calc(100vw-48px)] h-[calc(100vh-48px)] max-w-[1200px] max-h-[900px] ${glassHeavy} rounded-2xl border border-[var(--border)] shadow-2xl overflow-hidden flex flex-col`
-    : `w-[420px] h-[600px] ${glassHeavy} rounded-2xl border border-[var(--border)] shadow-2xl overflow-hidden flex flex-col`;
+    ? "w-[calc(100vw-48px)] h-[calc(100vh-48px)] max-w-[1200px] max-h-[900px] glass-heavy rounded-2xl border border-[var(--border)] shadow-2xl overflow-hidden flex flex-col"
+    : "w-[420px] h-[600px] glass-heavy rounded-2xl border border-[var(--border)] shadow-2xl overflow-hidden flex flex-col";
 
   return (
     <>
@@ -530,14 +521,14 @@ export default function LocalAiChat({ txs }: { txs: TxRecord[] }) {
         <div className={containerClass} style={containerStyle}>
           <div className={panelSizeClass}>
             {/* Header */}
-            <div className={`p-4 border-b border-[var(--border)]`} style={{ background: "linear-gradient(90deg, rgba(212,175,55,0.06) 0%, transparent 100%)" }}>
+            <div className="p-4 border-b border-[var(--border)] bg-gradient-to-r from-[var(--accent)]/10 to-transparent">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg gold-gradient flex items-center justify-center">
                     <Bot className="w-5 h-5 text-black" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-[var(--text)]">Privacy AI Assistant</h3>
+                    <h3 className="font-bold text-lg">Privacy AI Assistant</h3>
                     <div className="flex items-center gap-2">
                       <div className={`flex items-center gap-1 text-xs ${connected ? "text-green-400" : "text-amber-400"}`}>
                         <div className={`w-2 h-2 rounded-full ${connected ? "bg-green-500 animate-pulse" : "bg-amber-500"}`} />
@@ -551,7 +542,7 @@ export default function LocalAiChat({ txs }: { txs: TxRecord[] }) {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setStreamingEnabled(!streamingEnabled)}
-                    className={`p-2 rounded-lg transition-colors ${streamingEnabled ? "bg-[var(--accent)]/20 text-[var(--accent)]" : `hover:bg-[var(--surface)]`}`}
+                    className={`p-2 rounded-lg transition-colors ${streamingEnabled ? "bg-[var(--accent)]/20 text-[var(--accent)]" : "hover:bg-[var(--surface)]"}`}
                     title="Toggle streaming"
                     aria-pressed={streamingEnabled}
                   >
@@ -571,7 +562,7 @@ export default function LocalAiChat({ txs }: { txs: TxRecord[] }) {
 
                   <button
                     onClick={togglePin}
-                    className={`p-2 rounded-lg transition-colors ${pinned ? "bg-[var(--accent)] text-black" : `hover:bg-[var(--surface)]`}`}
+                    className={`p-2 rounded-lg transition-colors ${pinned ? "bg-[var(--accent)] text-black" : "hover:bg-[var(--surface)]"}`}
                     title={pinned ? "Unpin chat" : "Pin chat"}
                   >
                     {pinned ? <PinOff className="w-4 h-4" /> : <Pin className="w-4 h-4" />}
@@ -590,11 +581,11 @@ export default function LocalAiChat({ txs }: { txs: TxRecord[] }) {
 
             {/* Quick Actions Bar */}
             {showQuickActions && (
-              <div className={`p-4 border-b border-[var(--border)] ${glass}`}>
+              <div className="p-4 border-b border-[var(--border)] bg-[var(--surface)]/30">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-[var(--accent)]" />
-                    <span className="text-sm font-medium text-[var(--text)]">Quick Analysis</span>
+                    <span className="text-sm font-medium">Quick Analysis</span>
                   </div>
                   <button onClick={() => setShowQuickActions(false)} className="text-xs text-[var(--text-secondary)] hover:text-[var(--accent)]">
                     Hide
@@ -612,7 +603,7 @@ export default function LocalAiChat({ txs }: { txs: TxRecord[] }) {
                         <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${action.color} flex items-center justify-center`}>
                           <action.icon className="w-4 h-4 text-white" />
                         </div>
-                        <span className="text-xs font-medium text-left text-[var(--text)]">{action.label}</span>
+                        <span className="text-xs font-medium text-left">{action.label}</span>
                       </div>
                     </button>
                   ))}
@@ -621,11 +612,11 @@ export default function LocalAiChat({ txs }: { txs: TxRecord[] }) {
             )}
 
             {/* Chat History */}
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4" style={{ background: "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.02) 100%)" }}>
+            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-transparent to-[var(--surface)]/20">
               {history.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
                   <Brain className="w-16 h-16 mb-4 text-[var(--text-secondary)] opacity-30" />
-                  <h4 className="font-semibold mb-2 text-[var(--text)]">Ask About Your Transactions</h4>
+                  <h4 className="font-semibold mb-2">Ask About Your Transactions</h4>
                   <p className="text-sm text-[var(--text-secondary)] max-w-xs">
                     Ask questions about your Zcash transactions, privacy analysis, or request audit reports.
                   </p>
@@ -633,16 +624,16 @@ export default function LocalAiChat({ txs }: { txs: TxRecord[] }) {
               ) : (
                 history.map((message) => (
                   <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-                    <div className={`max-w-[80%] rounded-2xl p-4 ${message.role === "user" ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-dark)] text-black" : `${glass} border border-[var(--border)]`}`}>
+                    <div className={`max-w-[80%] rounded-2xl p-4 ${message.role === "user" ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-dark)] text-black" : "glass border border-[var(--border)]"}`}>
                       <div className="flex items-center gap-2 mb-2">
                         <div className={`w-6 h-6 rounded-full flex items-center justify-center ${message.role === "user" ? "bg-black/20" : "bg-gradient-to-r from-[var(--accent)]/20 to-transparent"}`}>
                           {message.role === "user" ? <span className="text-xs font-bold">You</span> : <Bot className="w-3 h-3 text-[var(--accent)]" />}
                         </div>
-                        <span className="text-xs opacity-70 text-[var(--text-secondary)]">
+                        <span className="text-xs opacity-70">
                           {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                         </span>
                       </div>
-                      <div className="whitespace-pre-wrap text-sm text-[var(--text)]">
+                      <div className="whitespace-pre-wrap text-sm">
                         {message.meta?.streaming ? (
                           <div className="flex items-center gap-2">
                             <Loader2 className="w-4 h-4 animate-spin" />
@@ -655,7 +646,7 @@ export default function LocalAiChat({ txs }: { txs: TxRecord[] }) {
 
                       {/* Meta information for assistant messages */}
                       {message.role === "assistant" && message.meta && !message.meta.streaming && (
-                        <div className="mt-3 space-y-2 text-[var(--text)]">
+                        <div className="mt-3 space-y-2">
                           {message.meta.chartData && message.meta.chartData.length > 0 && (
                             <div className="space-y-1">
                               <div className="text-xs text-[var(--text-secondary)]">Key Metrics:</div>
@@ -682,12 +673,12 @@ export default function LocalAiChat({ txs }: { txs: TxRecord[] }) {
 
               {thinking && (
                 <div className="flex justify-start">
-                  <div className={`${glass} rounded-2xl p-4 max-w-[80%]`}>
+                  <div className="glass rounded-2xl p-4 max-w-[80%]">
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-full bg-gradient-to-r from-[var(--accent)]/20 to-transparent flex items-center justify-center">
                         <Bot className="w-3 h-3 text-[var(--accent)]" />
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-[var(--text)]">
+                      <div className="flex items-center gap-2 text-sm">
                         <Loader2 className="w-4 h-4 animate-spin" />
                         <span>Processing your request...</span>
                       </div>
@@ -698,14 +689,14 @@ export default function LocalAiChat({ txs }: { txs: TxRecord[] }) {
             </div>
 
             {/* Input Area */}
-            <div className={`p-4 border-t border-[var(--border)] ${glass}`}>
+            <div className="p-4 border-t border-[var(--border)] bg-[var(--surface-glass)]">
               <div className="flex gap-2 mb-3">
                 <input
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Ask about your transactions..."
-                  className={`flex-1 p-3 rounded-xl ${glass} border border-[var(--border)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent text-[var(--text)]`}
+                  className="flex-1 p-3 rounded-xl glass border border-[var(--border)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent"
                   disabled={!connected || thinking}
                 />
                 <button
@@ -732,17 +723,17 @@ export default function LocalAiChat({ txs }: { txs: TxRecord[] }) {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <button onClick={exportCSVfromMeta} className={`flex items-center gap-1 px-3 py-1.5 rounded-lg ${glass} hover:bg-[var(--surface)] text-sm text-[var(--text)]`} title="Export CSV">
+                  <button onClick={exportCSVfromMeta} className="flex items-center gap-1 px-3 py-1.5 rounded-lg glass hover:bg-[var(--surface)] text-sm" title="Export CSV">
                     <Download className="w-3 h-3" />
                     <span className="hidden sm:inline">CSV</span>
                   </button>
 
-                  <button onClick={exportPrintableFromMeta} className={`flex items-center gap-1 px-3 py-1.5 rounded-lg ${glass} hover:bg-[var(--surface)] text-sm text-[var(--text)]`} title="Export PDF">
+                  <button onClick={exportPrintableFromMeta} className="flex items-center gap-1 px-3 py-1.5 rounded-lg glass hover:bg-[var(--surface)] text-sm" title="Export PDF">
                     <Printer className="w-3 h-3" />
                     <span className="hidden sm:inline">PDF</span>
                   </button>
 
-                  <button onClick={clearHistory} className={`flex items-center gap-1 px-3 py-1.5 rounded-lg ${glass} hover:bg-red-500/10 text-red-400 text-sm`} title="Clear history">
+                  <button onClick={clearHistory} className="flex items-center gap-1 px-3 py-1.5 rounded-lg glass hover:bg-red-500/10 text-red-400 text-sm" title="Clear history">
                     <Trash2 className="w-3 h-3" />
                     <span className="hidden sm:inline">Clear</span>
                   </button>
@@ -751,29 +742,29 @@ export default function LocalAiChat({ txs }: { txs: TxRecord[] }) {
 
               {/* Rules Panel */}
               {showRules && (
-                <div className={`mt-4 p-4 rounded-xl ${glass} border border-[var(--border)]`}>
+                <div className="mt-4 p-4 rounded-xl glass border border-[var(--border)]">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <Filter className="w-4 h-4 text-[var(--accent)]" />
-                      <span className="font-medium text-[var(--text)]">Audit Rules</span>
+                      <span className="font-medium">Audit Rules</span>
                     </div>
                     <span className="text-xs text-[var(--text-secondary)]">{rules.length} active rules</span>
                   </div>
 
                   <div className="space-y-3">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      <input placeholder="Rule name" value={ruleForm.name} onChange={(e) => setRuleForm({ ...ruleForm, name: e.target.value })} className="p-2 rounded-lg border border-[var(--border)] text-sm text-[var(--text)]" />
-                      <input placeholder="Pattern (regex)" value={ruleForm.pattern} onChange={(e) => setRuleForm({ ...ruleForm, pattern: e.target.value })} className="p-2 rounded-lg border border-[var(--border)] text-sm text-[var(--text)]" />
+                      <input placeholder="Rule name" value={ruleForm.name} onChange={(e) => setRuleForm({ ...ruleForm, name: e.target.value })} className="p-2 rounded-lg glass border border-[var(--border)] text-sm" />
+                      <input placeholder="Pattern (regex)" value={ruleForm.pattern} onChange={(e) => setRuleForm({ ...ruleForm, pattern: e.target.value })} className="p-2 rounded-lg glass border border-[var(--border)] text-sm" />
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                      <select value={ruleForm.field} onChange={(e) => setRuleForm({ ...ruleForm, field: e.target.value as any })} className="p-2 rounded-lg border border-[var(--border)] text-sm text-[var(--text)]">
+                      <select value={ruleForm.field} onChange={(e) => setRuleForm({ ...ruleForm, field: e.target.value as any })} className="p-2 rounded-lg glass border border-[var(--border)] text-sm">
                         <option value="memo">Memo</option>
                         <option value="address">Address</option>
                         <option value="txid">Transaction ID</option>
                       </select>
 
-                      <select value={ruleForm.severity} onChange={(e) => setRuleForm({ ...ruleForm, severity: e.target.value as any })} className="p-2 rounded-lg border border-[var(--border)] text-sm text-[var(--text)]">
+                      <select value={ruleForm.severity} onChange={(e) => setRuleForm({ ...ruleForm, severity: e.target.value as any })} className="p-2 rounded-lg glass border border-[var(--border)] text-sm">
                         <option value="high">High</option>
                         <option value="med">Medium</option>
                         <option value="low">Low</option>
@@ -791,7 +782,7 @@ export default function LocalAiChat({ txs }: { txs: TxRecord[] }) {
                           <div key={rule.id} className="flex items-center justify-between p-3 rounded-lg bg-[var(--surface)]">
                             <div className="space-y-1">
                               <div className="flex items-center gap-2">
-                                <span className="font-medium text-sm text-[var(--text)]">{rule.name}</span>
+                                <span className="font-medium text-sm">{rule.name}</span>
                                 <span className={`text-xs px-2 py-0.5 rounded-full ${rule.severity === "high" ? "bg-red-500/10 text-red-400" : rule.severity === "med" ? "bg-amber-500/10 text-amber-400" : "bg-green-500/10 text-green-400"}`}>{rule.severity}</span>
                               </div>
                               <div className="text-xs text-[var(--text-secondary)] font-mono">/{rule.pattern}/ → {rule.field}</div>
@@ -809,16 +800,16 @@ export default function LocalAiChat({ txs }: { txs: TxRecord[] }) {
             </div>
 
             {/* Status Bar */}
-            <div className={`px-4 py-2 border-t border-[var(--border)] ${glass} flex items-center justify-between text-xs text-[var(--text-secondary)]`}>
+            <div className="px-4 py-2 border-t border-[var(--border)] bg-[var(--surface)] flex items-center justify-between text-xs text-[var(--text-secondary)]">
               <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${connected ? "bg-green-500 animate-pulse" : "bg-amber-500"}`} />
                 <span>{connected ? "Local AI Active" : "Connecting..."}</span>
                 <span className="hidden sm:inline">• {ghost ? "Ghost Mode Enabled" : "Normal Mode"}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[var(--text)]">{history.length} messages</span>
+                <span>{history.length} messages</span>
                 {streamingEnabled && (
-                  <span className="flex items-center gap-1 text-[var(--text)]">
+                  <span className="flex items-center gap-1">
                     <Zap className="w-3 h-3" />
                     Streaming
                   </span>
